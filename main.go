@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/kuludi/kuludi-gin-vue/controller"
+)
 
 func main() {
-	fmt.Println("kuludi-gin-vue")
+	r := gin.Default()
+
+
+	r.GET("/ping",controller.Ping)
+  r.POST("/")
+
+	r.Run(":8080")
+
 }
