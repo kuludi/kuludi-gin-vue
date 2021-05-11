@@ -8,8 +8,8 @@ const (
 
 type Reply struct {
 	Code int `json:"code"`
-	Msg  string
-	Data interface{}
+	Msg  string `json:"msg"`
+	Data interface{} `json:"data"`
 }
 
 func NewReply(code int, msg string, data ...interface{}) (int, Reply) {
