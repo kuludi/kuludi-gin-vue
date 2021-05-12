@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-
 	if err := cmd.Execute(); err != nil {
 		println("start failed: ", err.Error())
 		os.Exit(-1)

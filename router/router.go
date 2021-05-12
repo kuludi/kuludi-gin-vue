@@ -10,6 +10,7 @@ func SetupRouter() *gin.Engine {
 
 	r.GET("/ping", controller.Ping)
 	r.POST("/api/user/register", controller.Register)
+	r.POST("/api/user/login", controller.Login)
 
 	return r
 }

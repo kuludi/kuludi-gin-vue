@@ -5,9 +5,8 @@ import (
 	"github.com/kuludi/kuludi-gin-vue/dao"
 	"github.com/kuludi/kuludi-gin-vue/model"
 	"github.com/kuludi/kuludi-gin-vue/utils"
-	"math/rand"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"time"
 )
 
 func Register(c *gin.Context) {
@@ -33,7 +32,7 @@ func Register(c *gin.Context) {
 		return
 	}
 	if len(name) == 0 {
-		name = RandomString(10)
+		name = utils.RandomString(10)
 	}
 	//创建用户
 	if dao.IsExist(phone) {
@@ -43,12 +42,23 @@ func Register(c *gin.Context) {
 		})
 		return
 	}
+
+	//加密密码
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": "500",
+			"msg":  "The password hash error",
+		})
+		return
+	}
+
 	user := &model.User{
 		Name:     name,
-		Password: password,
+		Password: string(hashPassword),
 		Phone:    phone,
 	}
-	err := dao.Register(user)
+	err = dao.Register(user)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code": "422",
@@ -64,17 +74,51 @@ func Register(c *gin.Context) {
 
 }
 
-//生成随机字符串
-func RandomString(n int) string {
-	var letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+func Login(c *gin.Context) {
+	phone := c.PostForm("phone")
+	password := c.PostForm("password")
 
-	res := make([]byte, n)
-
-	rand.Seed(time.Now().Unix())
-	for v, _ := range res {
-		res[v] = letters[rand.Intn(len(letters))]
+	if phone == "" || len(phone) != 11 {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"code": 422,
+			"msg":  "phone is not null or length is not equal 11",
+		})
+		return
+	}
+	if password == "" {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"code": 422,
+			"msg":  "password is not null",
+		})
+		return
 	}
 
-	return string(res)
+	if dao.IsExist(phone) == false {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"code": 422,
+			"msg":  "The user ie not register",
+		})
+		return
+	}
+	user, _ := dao.GetUserByPhone(phone)
 
+	//比对密码
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code": 401,
+			"msg":  "phone or password is not match",
+		})
+		return
+	}
+	token := "11"
+
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "Login success",
+		"data": gin.H{
+			"token": token,
+		},
+	})
 }
+
