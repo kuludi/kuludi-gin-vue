@@ -5,11 +5,11 @@ import (
 	"github.com/kuludi/kuludi-gin-vue/controller"
 )
 
-func Run() {
+func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/ping", controller.Ping)
 	r.POST("/api/user/register", controller.Register)
 
-	r.Run(":8080")
+	return r
 }

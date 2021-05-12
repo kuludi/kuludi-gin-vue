@@ -2,8 +2,9 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/kuludi/kuludi-gin-vue/dao"
+	"github.com/kuludi/kuludi-gin-vue/model"
 	"github.com/kuludi/kuludi-gin-vue/utils"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -18,7 +19,7 @@ func Register(c *gin.Context) {
 
 	//数据验证
 	if len(phone) != 11 {
-			c.JSON(http.StatusUnprocessableEntity, gin.H{
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code": "422",
 			"msg":  "Phone num at least 11",
 		})
@@ -35,12 +36,34 @@ func Register(c *gin.Context) {
 		name = RandomString(10)
 	}
 	//创建用户
-	log.Println(name, password, phone)
-	//返回结果
-	c.JSON(utils.Success("注册成功", gin.H{
-		"msg": "success",
-	}))
+	if dao.IsExist(phone) {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"code": "422",
+			"msg":  "the user is exist",
+		})
+		return
+	}
+	user := &model.User{
+		Name:     name,
+		Password: password,
+		Phone:    phone,
+	}
+	err := dao.Register(user)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"code": "422",
+			"msg":  err,
+		})
+
+	} else {
+		c.JSON(utils.Success("注册成功", gin.H{
+			"msg": "success",
+		}))
+
+	}
+
 }
+
 //生成随机字符串
 func RandomString(n int) string {
 	var letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")

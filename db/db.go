@@ -4,28 +4,27 @@ import (
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
+	"gorm.io/gorm/schema"
 )
 
-func InitDB() *gorm.DB {
+var (
+	DB *gorm.DB
+)
 
-	host := "127.0.0.1"
-	port := "3306"
-	database := "kuludi"
-	username := "root"
-	password := "123456"
-	charset := "utf8"
-
-	args := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=true",
+func Mysql(hostname string, port string, username string, password string, dbname string) (*gorm.DB, error) {
+	args := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true",
 		username,
 		password,
-		host,
+		hostname,
 		port,
-		database,
-		charset)
+		dbname,
+	)
+
 	db, err := gorm.Open(mysql.Open(args), &gorm.Config{
-		SkipDefaultTransaction:                   false,
-		NamingStrategy:                           nil,
+		SkipDefaultTransaction: false,
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
 		FullSaveAssociations:                     false,
 		Logger:                                   nil,
 		NowFunc:                                  nil,
@@ -43,12 +42,12 @@ func InitDB() *gorm.DB {
 		Plugins:                                  nil,
 	})
 	if err != nil {
-		log.Fatal("failed to connection database", err)
+		return nil, err
 	}
-	return db
-}
+	DB = db
 
-func Run() *gorm.DB {
-	db := InitDB()
-	return db
+
+
+	return db, nil
+
 }

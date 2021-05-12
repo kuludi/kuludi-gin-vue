@@ -1,12 +1,15 @@
 package main
 
 import (
-	"github.com/kuludi/kuludi-gin-vue/router"
+	"github.com/kuludi/kuludi-gin-vue/cmd"
+	"os"
 )
 
 func main() {
 
-
-	router.Run()
+	if err := cmd.Execute(); err != nil {
+		println("start failed: ", err.Error())
+		os.Exit(-1)
+	}
 
 }
