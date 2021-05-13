@@ -37,7 +37,11 @@ func AuthMiddleWare() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		//var user model.User
+
 		user := &model.User{}
+
+
 		db.DB.Where("id = ?", claims.UserId).First(&user)
 		c.Set("user", user)
 		c.Next()

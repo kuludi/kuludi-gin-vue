@@ -45,12 +45,12 @@ func Execute() error {
 		}
 
 		r := router.SetupRouter()
-
-		r.Run()
+		port := viper.GetString("server.port")
+		r.Run(port)
 
 		db.DB.AutoMigrate(&model.User{})
 
-		port := viper.GetString("server.port")
+
 
 		log.Println("port = *** =", port)
 

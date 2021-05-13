@@ -4,7 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kuludi/kuludi-gin-vue/common"
 	"github.com/kuludi/kuludi-gin-vue/dao"
+	"github.com/kuludi/kuludi-gin-vue/dto"
 	"github.com/kuludi/kuludi-gin-vue/model"
+	res "github.com/kuludi/kuludi-gin-vue/response"
 	"github.com/kuludi/kuludi-gin-vue/utils"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -133,6 +135,7 @@ func Login(c *gin.Context) {
 }
 
 func Info(c *gin.Context) {
-	user, _ := c.Get("user")
-	c.JSON(http.StatusOK, gin.H{"code": 200, "data": gin.H{"user": user}})
+	user ,_:= c.Get("user")
+	//gin.H{"user":dto.UserToDto(user.(*model.User))}
+	res.Response(c,http.StatusOK,200,"success",gin.H{"user":dto.UserToDto(user.(*model.User))})
 }
