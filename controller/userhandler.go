@@ -2,10 +2,12 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/kuludi/kuludi-gin-vue/common"
 	"github.com/kuludi/kuludi-gin-vue/dao"
 	"github.com/kuludi/kuludi-gin-vue/model"
 	"github.com/kuludi/kuludi-gin-vue/utils"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 )
 
@@ -110,8 +112,16 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
-	token := "11"
+	token, err := common.ReleaseToken(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "token error",
+		})
 
+		log.Println("token 生成错误: ", err)
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
@@ -122,3 +132,7 @@ func Login(c *gin.Context) {
 	})
 }
 
+func Info(c *gin.Context) {
+	user, _ := c.Get("user")
+	c.JSON(http.StatusOK, gin.H{"code": 200, "data": gin.H{"user": user}})
+}
